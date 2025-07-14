@@ -54,10 +54,13 @@ public class AccountService {
         transactionRequest.setAccount(account);
         transactionRequest.setTimestamp(LocalDateTime.now());
 
-        // Ao salvar a conta, a transação também é salva por causa do 'cascade'
+        // Adiciona a transação à lista da conta para manter a sincronia
+        account.getTransactions().add(transactionRequest);
+
+        // não precisamos mais salvar o repositório da transação diretamente.
+        // O CascadeType.ALL na entidade Account cuidará disso.
         accountRepository.save(account);
 
-        // Retorna a última transação adicionada
-        return account.getTransactions().get(account.getTransactions().size() - 1);
+        return transactionRequest; // Podemos retornar a própria requisição que já foi preenchida
     }
 }

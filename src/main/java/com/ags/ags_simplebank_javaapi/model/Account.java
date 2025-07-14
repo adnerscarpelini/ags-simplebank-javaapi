@@ -25,6 +25,6 @@ public class Account {
     private BigDecimal balance;
 
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference // Evita recursão infinita ao serializar para JSON
-    private List<Transaction> transactions;
+    @JsonManagedReference  // Evita recursão infinita ao serializar para JSON
+    private List<Transaction> transactions = new java.util.ArrayList<>();
 }
