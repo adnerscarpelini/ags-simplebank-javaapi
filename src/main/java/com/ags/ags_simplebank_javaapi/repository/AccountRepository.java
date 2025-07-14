@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+//Repository: acesso ao banco de dados (sem lógica de negócio)./
+//No Spring, o Repository (junto com o JPA) é o que mais se aproxima do Entity Framework (EF Core) no .NET.
 @Repository
 public interface AccountRepository extends JpaRepository<Account, Long> {
     // Método customizado para buscar uma conta pelo número dela
