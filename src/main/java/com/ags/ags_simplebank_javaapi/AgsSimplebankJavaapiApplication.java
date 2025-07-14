@@ -6,6 +6,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
 
@@ -17,14 +18,16 @@ public class AgsSimplebankJavaapiApplication {
     }
 
     // Este código será executado assim que a aplicação iniciar
-    // Crio uma conta padrão para a instância de testes
+    // Crio uma conta padrão para a instância de testes, assim não preciso criar um cadastro de usuários....
     @Bean
-    CommandLineRunner initDatabase(AccountRepository accountRepository) {
+    CommandLineRunner initDatabase(AccountRepository accountRepository, PasswordEncoder passwordEncoder) {
         return args -> {
             Account account = new Account();
             account.setAccountNumber("12345-6");
             account.setOwnerName("Adner Giovanni Scarpelini");
             account.setBalance(new BigDecimal("1000.00"));
+            // SALVANDO A SENHA JÁ CODIFICADA
+            account.setPassword(passwordEncoder.encode("S&nh@"));
             accountRepository.save(account);
         };
     }

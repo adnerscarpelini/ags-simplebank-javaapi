@@ -2,58 +2,58 @@ package com.ags.ags_simplebank_javaapi.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod; // Importe o HttpMethod
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy; // Importe a política de sessão
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder; // Importe o BCrypt
+import org.springframework.security.crypto.password.PasswordEncoder; // Importe o PasswordEncoder
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    private final SecurityFilter securityFilter; // Injetamos nosso filtro
 
-    /**
-     * Este Bean configura as regras de segurança HTTP.
-     *
-     * @param http o objeto HttpSecurity para configurar.
-     * @return o filtro de segurança construído.
-     * @throws Exception em caso de erro na configuração.
-     */
+    public SecurityConfig(SecurityFilter securityFilter) {
+        this.securityFilter = securityFilter;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // Inicia a configuração das regras de autorização de requisições
                 .authorizeHttpRequests(authorize -> authorize
-                        // Exige que qualquer requisição (anyRequest) seja autenticada (authenticated)
+                        // Permite acesso público ao endpoint de login
+                        .requestMatchers(HttpMethod.POST, "/login").permitAll()
+                        // Exige autenticação para todas as outras requisições
                         .anyRequest().authenticated()
                 )
-                // Habilita a autenticação HTTP Basic (envio de usuário e senha no cabeçalho)
-                .httpBasic(Customizer.withDefaults())
-                // Desabilita a proteção CSRF, que é comum para APIs REST stateless
-                .csrf(csrf -> csrf.disable());
+                // Como a API é stateless, não precisamos de proteção CSRF nem de sessões
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .httpBasic(Customizer.withDefaults()) // Mantemos o httpBasic por enquanto
+                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class); //Adicionamos nosso filtro para rodar ANTES do filtro padrão de autenticação
 
         return http.build();
     }
 
-    /**
-     * Este Bean define os usuários que podem acessar a aplicação.
-     * Para este projeto de prática, estamos criando um usuário em memória.
-     *
-     * @return um serviço com os detalhes do usuário.
-     */
+    // NOVO BEAN: Expondo o AuthenticationManager
     @Bean
-    public UserDetailsService userDetailsService() {
-        // Cria um usuário com nome "adner.scarpelini", senha "123456" e perfil "USER"
-        UserDetails user = User.withDefaultPasswordEncoder()
-                .username("adner.scarpelini")
-                .password("123456")
-                .roles("USER")
-                .build();
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
+    }
 
-        // Retorna um gerenciador que mantém os usuários em memória.
-        return new InMemoryUserDetailsManager(user);
+    // BEAN: Definindo o algoritmo de codificação de senhas
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
