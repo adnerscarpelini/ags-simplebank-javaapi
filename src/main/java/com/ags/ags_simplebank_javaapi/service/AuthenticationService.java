@@ -1,12 +1,10 @@
-package com.ags.ags_simplebank_javaapi.config;
+package com.ags.ags_simplebank_javaapi.service;
 
 import com.ags.ags_simplebank_javaapi.repository.AccountRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
 
 @Service
 public class AuthenticationService implements UserDetailsService {
